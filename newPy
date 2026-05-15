@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+set -e
+
+# Usage:
+# pynew myproject [packages...]
+
+if [ -z "$1" ]; then
+  echo "Usage: pynew <project-name> [packages...]"
+  exit 1
+fi
+
+PROJECT_NAME=$1
+shift
+PACKAGES="$@"
+
+# Create project dir
+mkdir -p "$PROJECT_NAME"
+cd "$PROJECT_NAME"
+
+# Initialize project
+uv init
+
+# Create and activate venv
+uv venv
+source .venv/bin/activate
+
+# Install packages if provided
+if [ -n "$PACKAGES" ]; then
+  uv pip install $PACKAGES
+fi
+
+echo ""
+echo "✅ Project '$PROJECT_NAME' ready."
+echo "👉 Activate later with: source .venv/bin/activate"

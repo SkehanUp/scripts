@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+#launchctl kickstart -k gui/502/com.acsandmann.swipe
+launchctl kickstart -k "gui/$(id -u)/com.acsandmann.swipe"
+echo "AeroSpace swipe should work now"
