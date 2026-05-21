@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# Usage:
+#   newrepo my-project
+#   newrepo my-project customRepoName
+#   newrepo my-project customRepoName public
+
+set -e
+
+FOLDER_NAME="$1"
+REPO_NAME="${2:-$1}"
+VISIBILITY="${3:-private}"
+
+if [ -z "$FOLDER_NAME" ]; then
+  echo "Usage: newrepo <folder-name> [repo-name] [private|public]"
+  exit 1
+fi
+
+if [[ "$VISIBILITY" != "private" && "$VISIBILITY" != "public" ]]; then
+  echo "Visibility must be 'private' or 'public'"
+  exit 1
+fi
+
+mkdir -p "$FOLDER_NAME"
+cd "$FOLDER_NAME"
+
+git init
+git branch -M main
+
+cat > .gitignore <<EOF
+.venv/
+__pycache__/
+*.pyc
+.env
+.DS_Store
+EOF
+
+git add .gitignore
+git commit -m "Initial commit"
+
+gh repo create "$REPO_NAME" \
+  --"$VISIBILITY" \
+  --source=. \
+  --remote=origin \
+  --push
+
+echo ""
+echo "Done:"
+echo "Local folder: $FOLDER_NAME"
+echo "GitHub repo:  $REPO_NAME"
+echo "Visibility:   $VISIBILITY"
