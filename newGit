@@ -1,9 +1,7 @@
 #!/bin/bash
 
-# Usage:
-#   newrepo my-project
-#   newrepo my-project customRepoName
-#   newrepo my-project customRepoName public
+# Usage: newGit <folder> [repo-name] [private|public]
+# Description: Create a local git repo and push to GitHub via gh.
 
 set -e
 

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+# Usage: paste
+# Description: Print clipboard contents to stdout.
+
+set -e
+
+if command -v pbpaste >/dev/null 2>&1; then
+  pbpaste
+elif command -v wl-paste >/dev/null 2>&1; then
+  wl-paste
+elif command -v xclip >/dev/null 2>&1; then
+  xclip -selection clipboard -o
+elif command -v xsel >/dev/null 2>&1; then
+  xsel --clipboard --output
+else
+  echo "No clipboard utility found."
+  echo "Install one of: wl-clipboard, xclip, xsel, or use macOS pbpaste."
+  exit 1
+fi

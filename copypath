@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+# Usage: copypath [path]
+# Description: Copy an absolute path to the clipboard. Default: current directory.
+
+set -e
+
+TARGET="${1:-.}"
+
+if [ ! -e "$TARGET" ]; then
+  echo "Error: Path not found: $TARGET"
+  exit 1
+fi
+
+if [ -d "$TARGET" ]; then
+  ABS="$(cd "$TARGET" && pwd)"
+else
+  ABS="$(cd "$(dirname "$TARGET")" && pwd)/$(basename "$TARGET")"
+fi
+
+if command -v pbcopy >/dev/null 2>&1; then
+  printf '%s' "$ABS" | pbcopy
+elif command -v wl-copy >/dev/null 2>&1; then
+  printf '%s' "$ABS" | wl-copy
+elif command -v xclip >/dev/null 2>&1; then
+  printf '%s' "$ABS" | xclip -selection clipboard
+elif command -v xsel >/dev/null 2>&1; then
+  printf '%s' "$ABS" | xsel --clipboard --input
+else
+  echo "No clipboard utility found."
+  echo "Install one of: wl-clipboard, xclip, xsel, or use macOS pbcopy."
+  exit 1
+fi
+
+echo "Copied path to clipboard: $ABS"

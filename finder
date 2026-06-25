@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+# Usage: finder [path]
+# Description: Open a path in Finder. Default: current directory.
+
+set -e
+
+TARGET="${1:-.}"
+
+if [ ! -e "$TARGET" ]; then
+  echo "Error: Path not found: $TARGET"
+  exit 1
+fi
+
+open "$TARGET"

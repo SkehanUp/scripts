@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+# Usage: colima start|stop|status|restart
+# Description: Wrapper around Colima (Docker VM).
+
+set -e
+
+COLIMA_BIN="$(command -v colima 2>/dev/null || true)"
+if [ -z "$COLIMA_BIN" ] || [ "$COLIMA_BIN" = "$HOME/.local/bin/colima" ]; then
+  COLIMA_BIN="/opt/homebrew/bin/colima"
+fi
+
+if [ ! -x "$COLIMA_BIN" ]; then
+  echo "Error: colima not found."
+  exit 1
+fi
+
+CMD="${1:-status}"
+
+case "$CMD" in
+  start|stop|status)
+    "$COLIMA_BIN" "$CMD"
+    ;;
+  restart)
+    "$COLIMA_BIN" stop || true
+    "$COLIMA_BIN" start
+    ;;
+  *)
+    echo "Usage: colima start|stop|status|restart"
+    exit 1
+    ;;
+esac

@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+# Usage: serve [port]
+# Description: Start a local HTTP server and expose it via ngrok. Default port: 8000.
+
+set -e
+
+PORT="${1:-8000}"
+
+if ! [[ "$PORT" =~ ^[0-9]+$ ]]; then
+  echo "Usage: serve [port]"
+  exit 1
+fi
+
+if ! command -v ngrok >/dev/null 2>&1; then
+  echo "Error: ngrok not found."
+  exit 1
+fi
+
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "Error: python3 not found."
+  exit 1
+fi
+
+cleanup() {
+  if [ -n "${SERVER_PID:-}" ]; then
+    kill "$SERVER_PID" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT INT TERM
+
+echo "Starting HTTP server on port $PORT ..."
+python3 -m http.server "$PORT" >/dev/null 2>&1 &
+SERVER_PID=$!
+sleep 0.5
+
+echo "Local:  http://localhost:$PORT"
+echo "Starting ngrok (Ctrl+C stops server and tunnel) ..."
+ngrok http "$PORT"

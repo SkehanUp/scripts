@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+# Usage: kctx [context]
+# Description: Fuzzy-switch Kubernetes context or namespace (kctx -n). Uses fzf and KUBECONFIG.
+
+set -e
+
+if ! command -v kubectl >/dev/null 2>&1; then
+  echo "Error: kubectl not found."
+  exit 1
+fi
+
+if [ "$1" = "-n" ]; then
+  if ! command -v fzf >/dev/null 2>&1; then
+    echo "Error: fzf not found."
+    exit 1
+  fi
+
+  NS="$(kubectl get ns -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | fzf --prompt="namespace> ")"
+  if [ -z "$NS" ]; then
+    echo "No namespace selected."
+    exit 1
+  fi
+
+  kubectl config set-context --current --namespace="$NS"
+  echo "Namespace set to: $NS"
+  exit 0
+fi
+
+if [ -n "$1" ]; then
+  kubectl config use-context "$1"
+  echo "Context set to: $1"
+  exit 0
+fi
+
+if ! command -v fzf >/dev/null 2>&1; then
+  echo "Error: fzf not found."
+  exit 1
+fi
+
+CTX="$(kubectl config get-contexts -o name | fzf --prompt="context> ")"
+if [ -z "$CTX" ]; then
+  echo "No context selected."
+  exit 1
+fi
+
+kubectl config use-context "$CTX"
+echo "Context set to: $CTX"

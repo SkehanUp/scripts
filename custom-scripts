@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+
+# Usage: custom-scripts
+# Description: List scripts and shims in ~/.local/bin (reads headers from each script).
+
+set -e
+
+BIN_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+read_header() {
+  local file="$1"
+  USAGE="$(grep -m1 '^# Usage: ' "$file" 2>/dev/null | sed 's/^# Usage: //')"
+  ABOUT="$(grep -m1 '^# Description: ' "$file" 2>/dev/null | sed 's/^# Description: //')"
+}
+
+is_script() {
+  local file="$1"
+  local kind
+  kind="$(file -b "$file" 2>/dev/null || true)"
+  [[ "$kind" == *script* ]] || head -1 "$file" | grep -q '^#!'
+}
+
+print_scripts() {
+  local file name
+  while IFS= read -r -d '' file; do
+    read_header "$file"
+    [[ -n "$USAGE" ]] || continue
+    name="$(basename "$file")"
+    if [[ -n "$ABOUT" ]]; then
+      printf "  %s\n    usage:  %s\n    about:  %s\n\n" "$name" "$USAGE" "$ABOUT"
+    else
+      printf "  %s\n    usage:  %s\n\n" "$name" "$USAGE"
+    fi
+  done < <(
+    find "$BIN_DIR" -maxdepth 1 -type f -perm -111 ! -type l -print0 |
+      sort -z
+  )
+}
+
+print_shims() {
+  while IFS='|' read -r name about; do
+    [[ -n "$name" ]] || continue
+    printf "  %-16s %s\n" "$name" "$about"
+  done <<'EOF'
+agent|Cursor agent CLI
+cursor|Cursor IDE shim (falls back to agent)
+cursor-agent|Cursor agent CLI
+graphify|Knowledge-graph tool (uv tool)
+graphify-mcp|Graphify MCP server
+uv|Python package manager
+uvx|Run Python tools in ephemeral envs
+EOF
+}
+
+case "${1:-}" in
+  -h|--help)
+    echo "Usage: custom-scripts"
+    echo "List scripts and shims in ~/.local/bin."
+    echo "Scripts are discovered via # Usage: and # Description: headers."
+    exit 0
+    ;;
+  "")
+    ;;
+  *)
+    echo "Usage: custom-scripts"
+    exit 1
+    ;;
+esac
+
+echo "~/.local/bin scripts"
+echo "────────────────────────────────────────────────────"
+echo
+echo "Scripts"
+echo "───────"
+echo
+print_scripts
+
+echo "Shims"
+echo "─────"
+echo
+print_shims
+
+echo
+echo "Add a script: put # Usage: and # Description: in the file header."
+echo "Full docs: $BIN_DIR/README.md"

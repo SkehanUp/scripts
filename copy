@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+# Usage: copy [text...]
+# Description: Copy stdin or arguments to the clipboard.
+#        echo foo | copy
+
+set -e
+
+if [ $# -gt 0 ]; then
+  INPUT="$*"
+else
+  INPUT="$(cat)"
+fi
+
+if command -v pbcopy >/dev/null 2>&1; then
+  printf '%s' "$INPUT" | pbcopy
+elif command -v wl-copy >/dev/null 2>&1; then
+  printf '%s' "$INPUT" | wl-copy
+elif command -v xclip >/dev/null 2>&1; then
+  printf '%s' "$INPUT" | xclip -selection clipboard
+elif command -v xsel >/dev/null 2>&1; then
+  printf '%s' "$INPUT" | xsel --clipboard --input
+else
+  echo "No clipboard utility found."
+  echo "Install one of: wl-clipboard, xclip, xsel, or use macOS pbcopy."
+  exit 1
+fi

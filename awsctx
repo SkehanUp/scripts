@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+# Usage: source awsctx [profile]
+# Description: Fuzzy AWS profile switch via granted assume. Must be sourced.
+#   source awsctx
+#   source awsctx dev/myprofile
+
+(return 0 2>/dev/null) || {
+  echo "Usage: source awsctx [profile]"
+  echo "Must be sourced so assume can export credentials to your shell."
+  exit 1
+}
+
+if ! command -v aws >/dev/null 2>&1; then
+  echo "Error: aws not found."
+  return 1
+fi
+
+if ! command -v assume >/dev/null 2>&1; then
+  echo "Error: assume (granted) not found."
+  return 1
+fi
+
+if [ -n "$1" ]; then
+  PROFILE="$1"
+else
+  if ! command -v fzf >/dev/null 2>&1; then
+    echo "Error: fzf not found."
+    return 1
+  fi
+
+  PROFILE="$(aws configure list-profiles | fzf --prompt="AWS profile> ")"
+fi
+
+if [ -z "$PROFILE" ]; then
+  echo "No profile selected."
+  return 1
+fi
+
+assume "$PROFILE"

@@ -1,2 +1,5 @@
 #!/usr/bin/env bash
+# Usage: cheat <command>
+# Description: Fetch a cheatsheet from cht.sh.
+
 curl "https://cht.sh/$1"

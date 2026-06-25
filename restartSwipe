@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Usage: restartSwipe
+# Description: Restart the AeroSpace swipe LaunchAgent.
 #launchctl kickstart -k gui/502/com.acsandmann.swipe
 launchctl kickstart -k "gui/$(id -u)/com.acsandmann.swipe"
 echo "AeroSpace swipe should work now"

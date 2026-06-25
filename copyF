@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# Usage: copyF <filename>
+# Usage: copyF <file>
+# Description: Copy file contents to the clipboard.
 
 if [ $# -ne 1 ]; then
   echo "Usage: copyF <filename>"

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+# Usage: flushdns
+# Description: Flush macOS DNS cache (requires sudo).
+
+set -e
+
+if [[ "$(uname -s)" != "Darwin" ]]; then
+  echo "Error: flushdns is macOS-only."
+  exit 1
+fi
+
+sudo dscacheutil -flushcache
+sudo killall -HUP mDNSResponder
+echo "DNS cache flushed."

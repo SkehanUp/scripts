@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+# Usage: brewup
+# Description: Run brew update, upgrade, cleanup, and autoremove.
+
+set -e
+
+if ! command -v brew >/dev/null 2>&1; then
+  echo "Error: brew not found."
+  exit 1
+fi
+
+brew update
+brew upgrade
+brew cleanup
+brew autoremove 2>/dev/null || true
+
+echo "Homebrew update complete."
