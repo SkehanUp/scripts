@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+# Usage: obs [path]
+# Description: Open a path in Obsidian. Default: current directory.
+
+set -e
+
+TARGET="${1:-.}"
+
+if [ ! -e "$TARGET" ]; then
+  echo "Error: Path not found: $TARGET"
+  exit 1
+fi
+
+OBSIDIAN="/Applications/Obsidian.app"
+if [ ! -d "$OBSIDIAN" ]; then
+  echo "Error: Obsidian not found at $OBSIDIAN"
+  exit 1
+fi
+
+if [ -d "$TARGET" ]; then
+  ABS="$(cd "$TARGET" && pwd)"
+else
+  ABS="$(cd "$(dirname "$TARGET")" && pwd)/$(basename "$TARGET")"
+fi
+
+open -a Obsidian "$ABS"

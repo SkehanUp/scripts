@@ -31,6 +31,7 @@ Personal CLI scripts and shims. On `$PATH` via `~/.zshrc`.
 | `killport` | `killport <port>` | Kill the process listening on a port. |
 | `newGit` | `newGit <folder> [repo-name] [private\|public]` | Create a local git repo, initial commit, and push to GitHub via `gh`. |
 | `newPy` | `newPy <project> [packages…]` | Scaffold a Python project with `uv` (init, venv, optional pip installs). |
+| `obs` | `obs [path]` | Open a path in Obsidian. Default: current directory. |
 | `paste` | `paste` | Print clipboard contents to stdout. |
 | `port` | `port <port>` | Show what is listening on a port (read-only; pair with `killport`). |
 | `restartSwipe` | `restartSwipe` | Restart the AeroSpace swipe LaunchAgent. |
