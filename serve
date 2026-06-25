@@ -22,10 +22,28 @@ if ! command -v python3 >/dev/null 2>&1; then
   exit 1
 fi
 
+get_ngrok_url() {
+  curl -sf http://127.0.0.1:4040/api/tunnels 2>/dev/null | python3 -c "
+import json, sys
+port = sys.argv[1]
+try:
+    data = json.load(sys.stdin)
+except json.JSONDecodeError:
+    sys.exit(1)
+for tunnel in data.get('tunnels', []):
+    addr = tunnel.get('config', {}).get('addr', '')
+    if not (addr.endswith(':' + port) or addr.endswith('localhost:' + port)):
+        continue
+    url = tunnel.get('public_url', '')
+    if url.startswith('https://'):
+        print(url)
+        break
+" "$PORT"
+}
+
 cleanup() {
-  if [ -n "${SERVER_PID:-}" ]; then
-    kill "$SERVER_PID" 2>/dev/null || true
-  fi
+  [ -n "${SERVER_PID:-}" ] && kill "$SERVER_PID" 2>/dev/null || true
+  [ -n "${NGROK_PID:-}" ] && kill "$NGROK_PID" 2>/dev/null || true
 }
 trap cleanup EXIT INT TERM
 
@@ -34,6 +52,30 @@ python3 -m http.server "$PORT" >/dev/null 2>&1 &
 SERVER_PID=$!
 sleep 0.5
 
+echo "Starting ngrok ..."
+ngrok http "$PORT" --log=stderr --log-level=error >/dev/null 2>&1 &
+NGROK_PID=$!
+
+PUBLIC_URL=""
+for _ in $(seq 1 30); do
+  PUBLIC_URL="$(get_ngrok_url || true)"
+  if [ -n "$PUBLIC_URL" ]; then
+    break
+  fi
+  sleep 0.5
+done
+
 echo "Local:  http://localhost:$PORT"
-echo "Starting ngrok (Ctrl+C stops server and tunnel) ..."
-ngrok http "$PORT"
+if [ -n "$PUBLIC_URL" ]; then
+  echo "Public: $PUBLIC_URL"
+  if command -v pbcopy >/dev/null 2>&1; then
+    printf '%s' "$PUBLIC_URL" | pbcopy
+    echo "(public URL copied to clipboard)"
+  fi
+else
+  echo "Public: (could not fetch — check http://127.0.0.1:4040)"
+fi
+echo "Web:    http://127.0.0.1:4040"
+
+echo "Ctrl+C stops server and tunnel."
+wait "$NGROK_PID"
