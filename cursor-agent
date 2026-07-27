@@ -7,6 +7,7 @@ find_cursor_agent() {
   local candidate
   for candidate in "$HOME"/.local/share/cursor-agent/versions/*/cursor-agent; do
     [[ -x "$candidate" ]] || continue
+    grep -q 'SCRIPT_DIR=.*realpath' "$candidate" || continue
     printf '%s\n' "$candidate"
     return 0
   done
