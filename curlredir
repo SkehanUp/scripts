@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+# Usage: curlredir <url> [curl-options...]
+# Description: Trace the redirect chain and print the final landing URL.
+
+set -euo pipefail
+
+if [[ $# -lt 1 ]]; then
+  echo "Usage: curlredir <url> [curl-options...]"
+  exit 1
+fi
+
+URL="$1"
+shift
+
+max_hops=25
+hop=0
+
+while (( hop < max_hops )); do
+  hop=$((hop + 1))
+  IFS='|' read -r code redirect effective < <(
+    curl -sS -o /dev/null "$@" -w '%{http_code}|%{redirect_url}|%{url_effective}\n' -I "$URL"
+  )
+
+  display="${effective:-$URL}"
+  echo "[$hop] $code  $display"
+
+  if [[ -n "$redirect" ]]; then
+    URL="$redirect"
+    continue
+  fi
+
+  if [[ "$code" =~ ^30[0-9]$ ]]; then
+    location="$(
+      curl -sS "$@" -D - -o /dev/null -I "$URL" |
+        awk 'BEGIN { IGNORECASE = 1 }
+             /^location:/ { sub(/^[^:]*:[ \t]*/, ""); print; exit }'
+    )"
+    if [[ -n "$location" ]]; then
+      if [[ "$location" == http://* || "$location" == https://* ]]; then
+        URL="$location"
+      elif [[ "$location" == /* ]]; then
+        base="${URL%%/*}//${URL#*//}"
+        base="${base%%/*}"
+        URL="$base$location"
+      else
+        URL="${URL%/}/$location"
+      fi
+      continue
+    fi
+  fi
+
+  echo "Final URL: $display"
+  exit 0
+done
+
+echo "Stopped after $max_hops hops (possible redirect loop)." >&2
+exit 1

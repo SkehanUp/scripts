@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+# Usage: curlhdr <url> [curl-options...]
+# Description: Dump response headers; highlight HSTS, CSP, and X-Frame-Options.
+
+set -euo pipefail
+
+if [[ $# -lt 1 ]]; then
+  echo "Usage: curlhdr <url> [curl-options...]"
+  exit 1
+fi
+
+URL="$1"
+shift
+
+headers="$(curl -sS -D - -o /dev/null "$@" "$URL")"
+printf '%s\n' "$headers"
+
+echo "── Security headers ──"
+if ! echo "$headers" | grep -iE '^(strict-transport-security|content-security-policy|x-frame-options|x-content-type-options|referrer-policy|permissions-policy):'; then
+  echo "(none of HSTS, CSP, X-Frame-Options, etc.)"
+fi

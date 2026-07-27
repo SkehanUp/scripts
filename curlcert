@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+# Usage: curlcert <url-or-host> [curl-options...]
+# Description: Show TLS certificate subject, issuer, and expiry.
+
+set -euo pipefail
+
+if [[ $# -lt 1 ]]; then
+  echo "Usage: curlcert <url-or-host> [curl-options...]"
+  exit 1
+fi
+
+URL="$1"
+shift
+
+if [[ "$URL" != http://* && "$URL" != https://* ]]; then
+  URL="https://$URL/"
+fi
+
+curl -sS -vI --max-time 15 "$@" "$URL" 2>&1 |
+  grep -E 'subject:|issuer:|start date:|expire date:' ||
+  {
+    echo "No TLS certificate details found." >&2
+    exit 1
+  }

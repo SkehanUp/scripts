@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+# Usage: curlorigin <hostname> <origin-ip> [url] [curl-options...]
+# Description: Pin a host to an origin IP with --resolve (bypass CDN/DNS).
+
+set -euo pipefail
+
+if [[ $# -lt 2 ]]; then
+  echo "Usage: curlorigin <hostname> <origin-ip> [url] [curl-options...]"
+  echo "Example: curlorigin example.com 203.0.113.10 https://example.com/api/health"
+  exit 1
+fi
+
+HOST="$1"
+IP="$2"
+shift 2
+
+if [[ $# -eq 0 || "$1" == -* ]]; then
+  URL="https://$HOST/"
+else
+  URL="$1"
+  shift
+fi
+
+if [[ "$URL" == https://* ]]; then
+  default_port=443
+elif [[ "$URL" == http://* ]]; then
+  default_port=80
+else
+  echo "Error: URL must start with http:// or https://"
+  exit 1
+fi
+
+PORT="$default_port"
+if [[ "$URL" =~ :[0-9]+(/|$) ]]; then
+  PORT="$(echo "$URL" | sed -E 's|^https?://[^:/]+:([0-9]+).*|\1|')"
+fi
+
+exec curl -sS --resolve "$HOST:$PORT:$IP" "$@" "$URL"

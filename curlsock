@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+# Usage: curlsock <socket-path> <path-or-url> [curl-options...]
+# Description: Query a Unix socket (e.g. Docker Engine API at /containers/json).
+
+set -euo pipefail
+
+if [[ $# -lt 2 ]]; then
+  echo "Usage: curlsock <socket-path> <path-or-url> [curl-options...]"
+  echo "Example: curlsock /var/run/docker.sock /containers/json"
+  exit 1
+fi
+
+SOCK="$1"
+TARGET="$2"
+shift 2
+
+if [[ "$TARGET" == http://* || "$TARGET" == https://* ]]; then
+  URL="$TARGET"
+else
+  [[ "$TARGET" == /* ]] || TARGET="/$TARGET"
+  URL="http://localhost$TARGET"
+fi
+
+exec curl -sS --unix-socket "$SOCK" "$@" "$URL"

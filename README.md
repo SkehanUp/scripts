@@ -23,9 +23,17 @@ Personal CLI scripts and shims. On `$PATH` via `~/.zshrc`.
 | `copy` | `copy [text…]` or `echo foo \| copy` | Copy stdin or arguments to the clipboard. |
 | `copyF` | `copyF <file>` | Copy **file contents** to the clipboard. |
 | `copypath` | `copypath [path]` | Copy an absolute **path** to the clipboard. Default: current directory. |
+| `curlcert` | `curlcert <url-or-host>` | Show TLS certificate subject, issuer, and expiry. |
+| `curlhdr` | `curlhdr <url>` | Dump response headers; highlight HSTS, CSP, and X-Frame-Options. |
+| `curlhost` | `curlhost <virtual-host> <url-or-ip>` | Send a custom Host header to probe virtual hosts on a shared IP. |
+| `curlorigin` | `curlorigin <hostname> <origin-ip> [url]` | Pin a host to an origin IP with `--resolve` (bypass CDN/DNS). |
+| `curlredir` | `curlredir <url>` | Trace the redirect chain and print the final landing URL. |
+| `curlsock` | `curlsock <socket-path> <path-or-url>` | Query a Unix socket (e.g. Docker Engine API). |
+| `curltime` | `curltime <url>` | Print DNS, TLS handshake, and TTFB timing breakdown. |
 | `custom-scripts` | `custom-scripts` | Print this help — list all scripts and shims with usage and descriptions. |
 | `finder` | `finder [path]` | Open a path in Finder. Default: current directory. |
 | `flushdns` | `flushdns` | Flush macOS DNS cache (requires `sudo`). |
+| `imgtext` | `imgtext <image> [--no-copy]` | Open an image, drag to select a region, OCR text to stdout/clipboard. |
 | `kctx` | `kctx [context]` | Fuzzy-switch Kubernetes context (`fzf`). Uses `$KUBECONFIG`. |
 | `kctx` | `kctx -n` | Fuzzy-switch namespace on the current context. |
 | `killport` | `killport <port>` | Kill the process listening on a port. |
@@ -52,7 +60,9 @@ Personal CLI scripts and shims. On `$PATH` via `~/.zshrc`.
 ## Notes
 
 - **Clipboard scripts** (`copy`, `copyF`, `copypath`, `paste`): macOS uses `pbcopy`/`pbpaste`; Linux fallbacks supported where installed.
+- **`curl*` scripts**: thin wrappers around common `curl` debugging patterns; all accept extra curl flags after the URL where noted.
 - **`awsctx`**: run as `source awsctx`, not `./awsctx`.
 - **`custom-scripts`**: reads `# Usage:` / `# Description:` headers from scripts; shims listed in the script itself.
+- **`imgtext`**: uses macOS Vision for OCR; first run compiles a cached binary via `swiftc`. Drag to select, Enter to read, Esc to quit.
 - **`serve`**: Ctrl+C stops both the local server and the ngrok tunnel.
 - **`newGit` / `newPy`**: usage text inside the scripts also references `newrepo` / `pynew` — filenames are the canonical command names today.

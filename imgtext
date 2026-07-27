@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+# Usage: imgtext <image> [--no-copy]
+# Description: Open an image, drag to select a region, OCR text to stdout/clipboard.
+
+set -euo pipefail
+
+BIN_DIR="$(cd "$(dirname "$0")" && pwd)"
+SOURCE="$BIN_DIR/imgtext.swift"
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/imgtext"
+BINARY="$CACHE_DIR/imgtext"
+
+if [[ ! -f "$SOURCE" ]]; then
+  echo "Error: missing $SOURCE"
+  exit 1
+fi
+
+mkdir -p "$CACHE_DIR"
+
+if [[ ! -x "$BINARY" ]] || [[ "$SOURCE" -nt "$BINARY" ]]; then
+  echo "Building imgtext..." >&2
+  swiftc -parse-as-library -O -o "$BINARY" "$SOURCE" -framework AppKit -framework Vision
+fi
+
+exec "$BINARY" "$@"
