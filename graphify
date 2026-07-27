@@ -1,1 +1,5 @@
-/Users/jackskehan/.local/share/uv/tools/graphifyy/bin/graphify
+#!/usr/bin/env bash
+# Usage: graphify [args]
+# Description: Run the graphifyy uv tool.
+set -euo pipefail
+exec uv tool run graphifyy "$@"
