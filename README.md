@@ -32,6 +32,7 @@ Personal CLI scripts and shims. On `$PATH` via `~/.zshrc`.
 | `curltime` | `curltime <url>` | Print DNS, TLS handshake, and TTFB timing breakdown. |
 | `custom-scripts` | `custom-scripts` | Print this help — list all scripts and shims with usage and descriptions. |
 | `finder` | `finder [path]` | Open a path in Finder. Default: current directory. |
+| `fsearch` | `fsearch [--grep\|--edit] [path]` | Fuzzy-find files; optionally search contents or open the selection. |
 | `flushdns` | `flushdns` | Flush macOS DNS cache (requires `sudo`). |
 | `imgtext` | `imgtext <image> [--no-copy]` | Open an image, drag to select a region, OCR text to stdout/clipboard. |
 | `kctx` | `kctx [context]` | Fuzzy-switch Kubernetes context (`fzf`). Uses `$KUBECONFIG`. |
@@ -52,8 +53,6 @@ Personal CLI scripts and shims. On `$PATH` via `~/.zshrc`.
 | `agent` | Cursor agent CLI |
 | `cursor` | Cursor IDE shim (falls back to `agent`) |
 | `cursor-agent` | Cursor agent CLI |
-| `graphify` | Knowledge-graph tool (`uv` tool) |
-| `graphify-mcp` | Graphify MCP server |
 | `uv` | Python package manager |
 | `uvx` | Run Python tools in ephemeral envs |
 

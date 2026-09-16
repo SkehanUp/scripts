@@ -45,8 +45,6 @@ print_shims() {
 agent|Cursor agent CLI
 cursor|Cursor IDE shim (falls back to agent)
 cursor-agent|Cursor agent CLI
-graphify|Knowledge-graph tool (uv tool)
-graphify-mcp|Graphify MCP server
 uv|Python package manager
 uvx|Run Python tools in ephemeral envs
 EOF

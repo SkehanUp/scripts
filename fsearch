@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+
+# Usage: fsearch [--grep|--edit] [path]
+# Description: Fuzzy-find files, optionally search file contents or open the selection.
+
+set -euo pipefail
+
+MODE="files"
+ROOT="."
+
+usage() {
+  cat <<'EOF'
+Usage: fsearch [--grep|--edit] [path]
+
+Fuzzy-find files under the current directory.
+
+  --grep    Search file contents with ripgrep, then choose a matching line
+  --edit    Open the selected file in $EDITOR
+  -h        Show this help
+EOF
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --grep) MODE="grep" ;;
+    --edit) MODE="edit" ;;
+    -h|--help) usage; exit 0 ;;
+    -*) echo "Error: Unknown option: $1" >&2; usage >&2; exit 2 ;;
+    *)
+      if [ "$ROOT" != "." ]; then
+        echo "Error: Only one search path is supported." >&2
+        exit 2
+      fi
+      ROOT="$1"
+      ;;
+  esac
+  shift
+done
+
+for command in fzf fd; do
+  if ! command -v "$command" >/dev/null 2>&1; then
+    echo "Error: $command not found. Install it with: brew install $command" >&2
+    exit 1
+  fi
+done
+
+if [ ! -d "$ROOT" ]; then
+  echo "Error: Search path is not a directory: $ROOT" >&2
+  exit 1
+fi
+
+PREVIEW='if [ -f {} ]; then bat --style=numbers --color=always --line-range :300 -- {}; else eza --tree --level=2 --color=always -- {}; fi'
+
+if [ "$MODE" = "grep" ]; then
+  if ! command -v rg >/dev/null 2>&1; then
+    echo "Error: rg not found. Install it with: brew install ripgrep" >&2
+    exit 1
+  fi
+
+  RESULT="$(rg --line-number --no-heading --color=never --smart-case . "$ROOT" 2>/dev/null \
+    | fzf --ansi --delimiter : --nth '1..' --scheme=path \
+      --prompt='grep> ' \
+      --preview 'file={1}; line={2}; bat --color=always --style=numbers --highlight-line --line-range "${line},$((line + 80))" -- "$file"' \
+      --preview-window='right,60%,border-left' \
+      | cut -d: -f1-2)"
+else
+  RESULT="$(fd --type f --hidden --follow --exclude .git . "$ROOT" \
+    | fzf --prompt='file> ' --scheme=path --preview "$PREVIEW" \
+      --preview-window='right,60%,border-left')"
+fi
+
+[ -n "$RESULT" ] || exit 0
+
+if [ "$MODE" = "grep" ]; then
+  FILE="${RESULT%%:*}"
+  LINE="${RESULT#*:}"
+  printf '%s:%s\n' "$FILE" "${LINE%%:*}"
+elif [ "$MODE" = "edit" ]; then
+  "${EDITOR:-nvim}" "$RESULT"
+else
+  printf '%s\n' "$RESULT"
+fi

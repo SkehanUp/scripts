@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-# Usage: graphify-mcp [args]
-# Description: Run the graphifyy MCP entrypoint via uv.
-set -euo pipefail
-exec uv tool run graphifyy -- --mcp "$@"

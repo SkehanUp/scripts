@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Usage: aero-app ghostty|brave|slack
+# Description: Launch or focus apps via AeroSpace (Slack focus; Ghostty/Brave new window).
+
+set -euo pipefail
+
+app="${1:?usage: aero-app ghostty|brave|slack}"
+
+focus_app() {
+  local bundle_id="$1"
+  local app_name="$2"
+  local wid
+  wid="$(aerospace list-windows --monitor all --app-bundle-id "$bundle_id" --format '%{window-id}' 2>/dev/null | head -1 || true)"
+  if [[ -n "$wid" ]]; then
+    aerospace focus --window-id "$wid"
+  else
+    open -a "$app_name"
+  fi
+}
+
+case "$app" in
+  ghostty) open -na Ghostty.app ;;
+  brave) open -na "Brave Browser" ;;
+  slack) focus_app com.tinyspeck.slackmacgap Slack ;;
+  *)
+    echo "unknown app: $app (expected ghostty, brave, or slack)" >&2
+    exit 1
+    ;;
+esac
