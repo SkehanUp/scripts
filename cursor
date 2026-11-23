@@ -7,8 +7,8 @@ find_cursor() {
   IFS=:
   for dir in $PATH; do
     [ -n "$dir" ] || continue
-    cursor_path="$dir/cursor"
-    if [ "$cursor_path" != "$HOME/.local/bin/cursor" ] && [ -x "$cursor_path" ]; then
+    cursor_path="${dir%/}/cursor"
+    if [ -x "$cursor_path" ] && ! [ "$cursor_path" -ef "$HOME/.local/bin/cursor" ] && ! [ "$cursor_path" -ef "$0" ]; then
       IFS="$old_IFS"
       echo "$cursor_path"
       return 0
